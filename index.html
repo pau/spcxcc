@@ -582,18 +582,21 @@
             const costBasis = document.getElementById('costBasisInput').value;
             const params = new URLSearchParams();
             if (shares) params.set('shares', shares);
-            if (costBasis) params.set('costBasis', costBasis);
-            const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-            history.replaceState(null, '', newURL);
+            if (costBasis) params.set('basis', costBasis);
+            const origin = window.location.origin !== 'null' ? window.location.origin : '';
+            const baseURL = origin + window.location.pathname;
+            const queryString = params.toString();
+            const cleanURL = queryString ? `${baseURL}?${queryString}` : baseURL;
+            history.replaceState(null, '', queryString ? `?${queryString}` : window.location.pathname);
             const bookmarkLink = document.getElementById('bookmarkLink');
-            bookmarkLink.href = window.location.href;
-            bookmarkLink.textContent = window.location.href;
+            bookmarkLink.href = cleanURL;
+            bookmarkLink.textContent = cleanURL;
         }
 
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             const shares = params.get('shares');
-            const costBasis = params.get('costBasis');
+            const costBasis = params.get('basis') || params.get('costBasis');
             if (shares) document.getElementById('sharesInput').value = shares;
             if (costBasis) document.getElementById('costBasisInput').value = costBasis;
         }
@@ -660,9 +663,7 @@
         initSortableTables();
         updateCountdown();
         updateTotals();
-        const bookmarkLink = document.getElementById('bookmarkLink');
-        bookmarkLink.href = window.location.href;
-        bookmarkLink.textContent = window.location.href;
+        updateURL();
         setInterval(updateCountdown, 60000);
     </script>
 </body>
