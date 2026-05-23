@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPCX IPO Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background: #000;
+            min-height: 100vh;
+            color: #0f0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+        }
+
+        .countdown-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .countdown-label {
+            margin-bottom: 10px;
+        }
+
+        .countdown {
+            font-size: 5rem;
+            font-weight: normal;
+        }
+
+        .ipo-date {
+            margin-top: 10px;
+        }
+
+        .panel {
+            margin-bottom: 40px;
+        }
+
+        .panel-title {
+            margin-bottom: 15px;
+        }
+
+        .shares-input-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        #sharesInput,
+        #costBasisInput {
+            background: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 1rem;
+            padding: 8px 12px;
+            width: 150px;
+            text-align: right;
+            outline: none;
+        }
+
+        .value-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .value-table th,
+        .value-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #0f0;
+        }
+
+        .value-table th {
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .value-table th:hover {
+            background: #001a00;
+        }
+
+        a,
+        a:visited {
+            color: #0f0;
+        }
+
+        .total-col {
+            font-weight: bold;
+            color: #0f0;
+            background: #001a00;
+        }
+
+        .separator {
+            margin: 30px 0;
+            border: none;
+            border-top: 1px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SPCX IPO COMMAND CENTER</h1>
+            <div class="subtitle">===================================</div>
+        </header>
+
+        <section class="countdown-section">
+            <div class="countdown" id="countdown">T-0D</div>
+            <div class="ipo-date">IPO: JUNE 12, 2026</div>
+        </section>
+
+        <hr class="separator">
+
+        <div class="panel">
+            <div class="panel-title">&gt; HOLDINGS</div>
+            <div class="shares-input-container">
+                <label for="sharesInput">Share Count:</label>
+                <input type="number" id="sharesInput" value="100" min="0" step="1">
+                <label for="costBasisInput">Avg Cost Basis/Share ($):</label>
+                <input type="number" id="costBasisInput" value="1" min="0" step="0.01">
+            </div>
+            <div style="margin-top: 15px;">
+                Bookmark: <a href="#" id="bookmarkLink"></a>
+            </div>
+        </div>
+
+        <hr class="separator">
+
+        <div class="panel">
+            <div class="panel-title">&gt; VALUATION</div>
+            <table class="value-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Price</th>
+                        <th>Last Updated</th>
+                        <th class="total-col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="https://spacex.solium.com/" target="_blank" rel="noopener">Shareworks</a></td>
+                        <td>$105.318</td>
+                        <td>5/22/2026</td>
+                        <td class="total-col" data-price="105.318">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td><a href="https://www.hiive.com/securities/spacex-stock" target="_blank" rel="noopener">Hiive</a></td>
+                        <td>$259.992</td>
+                        <td>5/22/2026</td>
+                        <td class="total-col" data-price="259.992">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td><a href="https://forgeglobal.com/spacex_stock/" target="_blank" rel="noopener">Forge Global</a></td>
+                        <td>$130.32</td>
+                        <td>5/22/2026</td>
+                        <td class="total-col" data-price="130.32">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="separator">
+
+        <div class="panel">
+            <div class="panel-title">&gt; LONG TERM CAPITAL GAINS TAX BY STATE</div>
+            <table class="value-table">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th>Has LT Cap Gains Tax</th>
+                        <th>Details</th>
+                        <th class="total-col">Est LT Cap Gains Tax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alabama</td>
+                        <td>✅</td>
+                        <td>Up to 5%</td>
+                        <td class="total-col" data-taxrate="0.05">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Alaska</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Arizona</td>
+                        <td>✅</td>
+                        <td>Flat 2.5%</td>
+                        <td class="total-col" data-taxrate="0.025">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Arkansas</td>
+                        <td>✅</td>
+                        <td>Up to 4.7%</td>
+                        <td class="total-col" data-taxrate="0.047">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>California</td>
+                        <td>✅</td>
+                        <td>Up to 13.3%</td>
+                        <td class="total-col" data-taxrate="0.133">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Colorado</td>
+                        <td>✅</td>
+                        <td>Flat 4.4%</td>
+                        <td class="total-col" data-taxrate="0.044">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Connecticut</td>
+                        <td>✅</td>
+                        <td>Up to 6.99%</td>
+                        <td class="total-col" data-taxrate="0.0699">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Delaware</td>
+                        <td>✅</td>
+                        <td>Up to 6.6%</td>
+                        <td class="total-col" data-taxrate="0.066">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Florida</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Georgia</td>
+                        <td>✅</td>
+                        <td>Up to 5.49%</td>
+                        <td class="total-col" data-taxrate="0.0549">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Hawaii</td>
+                        <td>✅</td>
+                        <td>Up to 11%</td>
+                        <td class="total-col" data-taxrate="0.11">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Idaho</td>
+                        <td>✅</td>
+                        <td>Flat 5.8%</td>
+                        <td class="total-col" data-taxrate="0.058">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Illinois</td>
+                        <td>✅</td>
+                        <td>Flat 4.95%</td>
+                        <td class="total-col" data-taxrate="0.0495">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Indiana</td>
+                        <td>✅</td>
+                        <td>Flat 3.05%</td>
+                        <td class="total-col" data-taxrate="0.0305">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Iowa</td>
+                        <td>✅</td>
+                        <td>Up to 5.7%</td>
+                        <td class="total-col" data-taxrate="0.057">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Kansas</td>
+                        <td>✅</td>
+                        <td>Up to 5.7%</td>
+                        <td class="total-col" data-taxrate="0.057">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Kentucky</td>
+                        <td>✅</td>
+                        <td>Flat 4.5%</td>
+                        <td class="total-col" data-taxrate="0.045">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Louisiana</td>
+                        <td>✅</td>
+                        <td>Up to 4.25%</td>
+                        <td class="total-col" data-taxrate="0.0425">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Maine</td>
+                        <td>✅</td>
+                        <td>Up to 7.15%</td>
+                        <td class="total-col" data-taxrate="0.0715">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Maryland</td>
+                        <td>✅</td>
+                        <td>Up to 5.75%</td>
+                        <td class="total-col" data-taxrate="0.0575">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Massachusetts</td>
+                        <td>✅</td>
+                        <td>5% + 4% surtax over $1M</td>
+                        <td class="total-col" data-taxrate="0.05" data-threshold="1000000" data-surcharge="0.04">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Michigan</td>
+                        <td>✅</td>
+                        <td>Flat 4.25%</td>
+                        <td class="total-col" data-taxrate="0.0425">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Minnesota</td>
+                        <td>✅</td>
+                        <td>Up to 9.85%</td>
+                        <td class="total-col" data-taxrate="0.0985">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Mississippi</td>
+                        <td>✅</td>
+                        <td>Flat 5%</td>
+                        <td class="total-col" data-taxrate="0.05">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Missouri</td>
+                        <td>✅</td>
+                        <td>Up to 4.95%</td>
+                        <td class="total-col" data-taxrate="0.0495">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Montana</td>
+                        <td>✅</td>
+                        <td>Up to 6.75%</td>
+                        <td class="total-col" data-taxrate="0.0675">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Nebraska</td>
+                        <td>✅</td>
+                        <td>Up to 6.64%</td>
+                        <td class="total-col" data-taxrate="0.0664">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Nevada</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>New Hampshire</td>
+                        <td>❌</td>
+                        <td>No tax on capital gains</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>New Jersey</td>
+                        <td>✅</td>
+                        <td>Up to 10.75%</td>
+                        <td class="total-col" data-taxrate="0.1075">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>New Mexico</td>
+                        <td>✅</td>
+                        <td>Up to 5.9%</td>
+                        <td class="total-col" data-taxrate="0.059">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>New York</td>
+                        <td>✅</td>
+                        <td>Up to 10.9%</td>
+                        <td class="total-col" data-taxrate="0.109">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>North Carolina</td>
+                        <td>✅</td>
+                        <td>Flat 5.25%</td>
+                        <td class="total-col" data-taxrate="0.0525">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>North Dakota</td>
+                        <td>✅</td>
+                        <td>Up to 2.5%</td>
+                        <td class="total-col" data-taxrate="0.025">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Ohio</td>
+                        <td>✅</td>
+                        <td>Up to 3.5%</td>
+                        <td class="total-col" data-taxrate="0.035">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Oklahoma</td>
+                        <td>✅</td>
+                        <td>Up to 4.75%</td>
+                        <td class="total-col" data-taxrate="0.0475">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Oregon</td>
+                        <td>✅</td>
+                        <td>Up to 9.9%</td>
+                        <td class="total-col" data-taxrate="0.099">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Pennsylvania</td>
+                        <td>✅</td>
+                        <td>Flat 3.07%</td>
+                        <td class="total-col" data-taxrate="0.0307">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Rhode Island</td>
+                        <td>✅</td>
+                        <td>Up to 5.99%</td>
+                        <td class="total-col" data-taxrate="0.0599">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>South Carolina</td>
+                        <td>✅</td>
+                        <td>Up to 6.5%</td>
+                        <td class="total-col" data-taxrate="0.065">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>South Dakota</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Tennessee</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Texas</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Utah</td>
+                        <td>✅</td>
+                        <td>Flat 4.65%</td>
+                        <td class="total-col" data-taxrate="0.0465">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Vermont</td>
+                        <td>✅</td>
+                        <td>Up to 8.75%</td>
+                        <td class="total-col" data-taxrate="0.0875">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Virginia</td>
+                        <td>✅</td>
+                        <td>Up to 5.75%</td>
+                        <td class="total-col" data-taxrate="0.0575">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Washington</td>
+                        <td>✅</td>
+                        <td>7% on gains over $250k</td>
+                        <td class="total-col" data-taxrate="0.07" data-threshold="250000">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>West Virginia</td>
+                        <td>✅</td>
+                        <td>Up to 6.5%</td>
+                        <td class="total-col" data-taxrate="0.065">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Wisconsin</td>
+                        <td>✅</td>
+                        <td>Up to 7.65%</td>
+                        <td class="total-col" data-taxrate="0.0765">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Wyoming</td>
+                        <td>❌</td>
+                        <td>No state income tax</td>
+                        <td class="total-col" data-taxrate="0">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; font-size: 2rem;">
+            🚀🚀🚀
+        </div>
+    </div>
+
+    <script>
+        const SHAREWORKS_PRICE = 105.318;
+        function updateCountdown() {
+            const ipoDate = new Date('2026-06-12T00:00:00');
+            const now = new Date();
+            
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfIPO = new Date(ipoDate.getFullYear(), ipoDate.getMonth(), ipoDate.getDate());
+            
+            const diffTime = startOfIPO - startOfToday;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const countdownEl = document.getElementById('countdown');
+            
+            if (diffDays <= 0) {
+                countdownEl.textContent = 'T-0D';
+            } else {
+                countdownEl.textContent = `T-${diffDays}D`;
+            }
+        }
+
+        function formatCurrency(value) {
+            return '$' + value.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function updateTotals() {
+            const shares = parseFloat(document.getElementById('sharesInput').value) || 0;
+            const costBasis = parseFloat(document.getElementById('costBasisInput').value) || 0;
+            const totalCells = document.querySelectorAll('[data-price]');
+            
+            totalCells.forEach(cell => {
+                const price = parseFloat(cell.dataset.price);
+                const total = shares * price;
+                cell.textContent = formatCurrency(total);
+            });
+
+            const taxCells = document.querySelectorAll('[data-taxrate]');
+            const gain = Math.max(0, shares * (SHAREWORKS_PRICE - costBasis));
+            
+            taxCells.forEach(cell => {
+                const taxRate = parseFloat(cell.dataset.taxrate);
+                const threshold = parseFloat(cell.dataset.threshold) || 0;
+                const surcharge = parseFloat(cell.dataset.surcharge) || 0;
+                
+                let tax = 0;
+                if (surcharge > 0 && threshold > 0) {
+                    // Tiered tax (e.g., MA): base rate on all, surcharge on excess over threshold
+                    tax = gain * taxRate;
+                    if (gain > threshold) {
+                        tax += (gain - threshold) * surcharge;
+                    }
+                } else if (threshold > 0) {
+                    // Threshold-only tax (e.g., WA): only tax amount over threshold
+                    const taxableAmount = Math.max(0, gain - threshold);
+                    tax = taxableAmount * taxRate;
+                } else {
+                    // Standard tax: rate on full amount
+                    tax = gain * taxRate;
+                }
+                
+                cell.textContent = formatCurrency(tax);
+            });
+        }
+
+        function updateURL() {
+            const shares = document.getElementById('sharesInput').value;
+            const costBasis = document.getElementById('costBasisInput').value;
+            const params = new URLSearchParams();
+            if (shares) params.set('shares', shares);
+            if (costBasis) params.set('costBasis', costBasis);
+            const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
+            history.replaceState(null, '', newURL);
+            const bookmarkLink = document.getElementById('bookmarkLink');
+            bookmarkLink.href = window.location.href;
+            bookmarkLink.textContent = window.location.href;
+        }
+
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const shares = params.get('shares');
+            const costBasis = params.get('costBasis');
+            if (shares) document.getElementById('sharesInput').value = shares;
+            if (costBasis) document.getElementById('costBasisInput').value = costBasis;
+        }
+
+        function onInputChange() {
+            updateTotals();
+            updateURL();
+        }
+
+        function sortTable(table, colIndex, isAscending) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                let aVal = a.cells[colIndex].textContent.trim();
+                let bVal = b.cells[colIndex].textContent.trim();
+                
+                // Handle currency values
+                if (aVal.startsWith('$')) {
+                    aVal = parseFloat(aVal.replace(/[$,]/g, '')) || 0;
+                    bVal = parseFloat(bVal.replace(/[$,]/g, '')) || 0;
+                    return isAscending ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Handle emojis (✅ = 1, ❌ = 0)
+                if (aVal === '✅' || aVal === '❌') {
+                    aVal = aVal === '✅' ? 1 : 0;
+                    bVal = bVal === '✅' ? 1 : 0;
+                    return isAscending ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Handle dates
+                if (aVal.match(/^\d+\/\d+\/\d+$/)) {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                    return isAscending ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Default string comparison
+                return isAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function initSortableTables() {
+            document.querySelectorAll('.value-table').forEach(table => {
+                const headers = table.querySelectorAll('th');
+                headers.forEach((header, index) => {
+                    header.dataset.sortAsc = 'true';
+                    header.addEventListener('click', () => {
+                        const isAscending = header.dataset.sortAsc === 'true';
+                        sortTable(table, index, isAscending);
+                        header.dataset.sortAsc = isAscending ? 'false' : 'true';
+                    });
+                });
+            });
+        }
+
+        document.getElementById('sharesInput').addEventListener('input', onInputChange);
+        document.getElementById('costBasisInput').addEventListener('input', onInputChange);
+
+        loadFromURL();
+        initSortableTables();
+        updateCountdown();
+        updateTotals();
+        const bookmarkLink = document.getElementById('bookmarkLink');
+        bookmarkLink.href = window.location.href;
+        bookmarkLink.textContent = window.location.href;
+        setInterval(updateCountdown, 60000);
+    </script>
+</body>
+</html>
