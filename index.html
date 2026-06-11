@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPCX Command Center</title>
     <style>
+        :root {
+            --teal: #4ECDC4;
+            --teal-bright: #a8f0e8;
+            --teal-muted: rgba(78, 205, 196, 0.65);
+            --teal-border-muted: rgba(78, 205, 196, 0.45);
+            --teal-glow: rgba(78, 205, 196, 0.6);
+            --bg-panel: #0a1a1a;
+            --bg-flash: #1a4a44;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,12 +25,12 @@
             font-family: monospace;
             background: #000;
             min-height: 100vh;
-            color: #4ECDC4;
+            color: var(--teal);
             padding: 40px 20px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -35,17 +45,9 @@
             margin-bottom: 5px;
         }
 
-        .subtitle {
-            font-size: 1rem;
-        }
-
         .countdown-section {
             text-align: center;
             margin-bottom: 50px;
-        }
-
-        .countdown-label {
-            margin-bottom: 10px;
         }
 
         .countdown {
@@ -61,28 +63,114 @@
             margin-bottom: 40px;
         }
 
+        .chart-holdings-panel {
+            display: flex;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .chart-col {
+            flex: 1;
+            min-width: 0;
+            height: 300px;
+        }
+
+        .holdings-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        @media (max-width: 768px) {
+            .chart-holdings-panel {
+                flex-direction: column;
+            }
+
+            .chart-col {
+                height: 300px;
+            }
+        }
+
         .panel-title {
             margin-bottom: 15px;
         }
 
-        .shares-input-container {
-            display: flex;
+        .holdings-grid {
+            display: grid;
+            grid-template-columns: max-content 150px;
+            gap: 12px 15px;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
         }
 
-        #sharesInput,
-        #costBasisInput {
-            background: #000;
-            border: 1px solid #4ECDC4;
-            color: #4ECDC4;
+        .holdings-grid__row {
+            display: contents;
+        }
+
+        .holdings-input {
             font-family: monospace;
             font-size: 1rem;
             padding: 8px 12px;
             width: 150px;
             text-align: right;
             outline: none;
+            background: #000;
+            border: 1px solid var(--teal);
+            color: var(--teal);
+        }
+
+        .holdings-input--readonly {
+            background: var(--bg-panel);
+            border: 1px dashed var(--teal-border-muted);
+            color: var(--teal-muted);
+            cursor: default;
+        }
+
+        @keyframes price-input-flash {
+            0% {
+                background: var(--bg-flash);
+                border-color: var(--teal);
+                color: var(--teal);
+            }
+            100% {
+                background: var(--bg-panel);
+                border-color: var(--teal-border-muted);
+                color: var(--teal-muted);
+            }
+        }
+
+        @keyframes holdings-total-flash {
+            0% {
+                color: var(--teal-bright);
+                text-shadow: 0 0 16px var(--teal-glow);
+            }
+            100% {
+                color: var(--teal);
+                text-shadow: none;
+            }
+        }
+
+        #pricePerShare.value-flash {
+            animation: price-input-flash 0.6s ease-out;
+        }
+
+        .holdings-total.value-flash {
+            animation: holdings-total-flash 0.6s ease-out;
+        }
+
+        .holdings-total {
+            margin-top: 20px;
+            font-size: 2.5rem;
+            font-weight: normal;
+            color: var(--teal);
+        }
+
+        .holdings-bookmark {
+            margin-top: 15px;
+        }
+
+        .footer-emoji {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 2rem;
         }
 
         .value-table {
@@ -94,7 +182,7 @@
         .value-table td {
             padding: 10px;
             text-align: left;
-            border: 1px solid #4ECDC4;
+            border: 1px solid var(--teal);
         }
 
         .value-table th {
@@ -103,26 +191,35 @@
         }
 
         .value-table th:hover {
-            background: #0a1a1a;
+            background: var(--bg-panel);
         }
 
         a,
         a:visited {
-            color: #4ECDC4;
+            color: var(--teal);
         }
 
         .total-col {
             font-weight: bold;
-            color: #4ECDC4;
-            background: #0a1a1a;
+            color: var(--teal);
+            background: var(--bg-panel);
         }
 
         .separator {
             margin: 30px 0;
             border: none;
-            border-top: 1px solid #4ECDC4;
+            border-top: 1px solid var(--teal);
         }
     </style>
+    <script>
+        // TradingView widgets use closed shadow roots; open them so we can read the displayed price.
+        (function () {
+            const originalAttachShadow = Element.prototype.attachShadow;
+            Element.prototype.attachShadow = function (init) {
+                return originalAttachShadow.call(this, { ...init, mode: 'open' });
+            };
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
@@ -131,80 +228,40 @@
         </header>
 
         <section class="countdown-section">
-            <div class="countdown" id="countdown">T-0D</div>
-            <div class="ipo-date">IPO: June 12, 2026</div>
+            <div class="countdown" id="countdown">--:--:--</div>
+            <div class="ipo-date" id="ipoDate"></div>
         </section>
 
         <hr class="separator">
 
-        <!-- TradingView Widget BEGIN -->
-        <div style="width: 100%; height: 300px;">
-          <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-mini-chart.js"></script>
-          <tv-mini-chart theme="dark" symbol="BINANCE:SPCXUSDT.P"></tv-mini-chart>
-        </div>
-        <!-- TradingView Widget END -->
-
-        <hr class="separator">
-
-        <div class="panel">
-            <div class="panel-title">&gt; HOLDINGS</div>
-            <div class="shares-input-container">
-                <label for="sharesInput">Share Count:</label>
-                <input type="number" id="sharesInput" value="100" min="0" step="1">
-                <label for="costBasisInput">Avg Cost Basis/Share ($):</label>
-                <input type="number" id="costBasisInput" value="1" min="0" step="0.01">
+        <div class="panel chart-holdings-panel">
+            <div class="chart-col">
+                <!-- TradingView Widget BEGIN -->
+                <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-mini-chart.js"></script>
+                <tv-mini-chart id="chartWidget" theme="dark" symbol="NASDAQ:SPCX"></tv-mini-chart>
+                <!-- TradingView Widget END -->
             </div>
-            <div style="margin-top: 15px;">
-                Bookmark: <a href="#" id="bookmarkLink"></a>
+            <div class="holdings-col">
+                <div class="panel-title">&gt; HOLDINGS</div>
+                <div class="holdings-grid">
+                    <div class="holdings-grid__row">
+                        <label for="pricePerShare">Price Per Share ($):</label>
+                        <input type="text" id="pricePerShare" class="holdings-input holdings-input--readonly" value="" readonly>
+                    </div>
+                    <div class="holdings-grid__row">
+                        <label for="sharesInput">Share Count:</label>
+                        <input type="number" id="sharesInput" class="holdings-input" value="100" min="0" step="1">
+                    </div>
+                    <div class="holdings-grid__row">
+                        <label for="costBasisInput">Avg Cost Basis/Share ($):</label>
+                        <input type="number" id="costBasisInput" class="holdings-input" value="1" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="holdings-total" id="holdingsTotal">$0.00</div>
+                <div class="holdings-bookmark">
+                    Bookmark: <a href="#" id="bookmarkLink"></a>
+                </div>
             </div>
-        </div>
-
-        <hr class="separator">
-
-        <div class="panel">
-            <div class="panel-title">&gt; VALUATION</div>
-            <table class="value-table">
-                <thead>
-                    <tr>
-                        <th>Source</th>
-                        <th>Price</th>
-                        <th>Last Updated</th>
-                        <th class="total-col">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><a href="https://spacex.solium.com/" target="_blank" rel="noopener">Shareworks</a></td>
-                        <td>$105.318</td>
-                        <td>May 22, 2026</td>
-                        <td class="total-col" data-price="105.318">$0.00</td>
-                    </tr>
-                    <tr>
-                        <td><a href="https://www.hiive.com/securities/spacex-stock" target="_blank" rel="noopener">Hiive</a></td>
-                        <td>$132.576</td>
-                        <td>May 31, 2026</td>
-                        <td class="total-col" data-price="132.576">$0.00</td>
-                    </tr>
-                    <tr>
-                        <td><a href="https://forgeglobal.com/spacex_stock/" target="_blank" rel="noopener">Forge Global</a></td>
-                        <td>$128.87</td>
-                        <td>May 31, 2026</td>
-                        <td class="total-col" data-price="128.87">$0.00</td>
-                    </tr>
-                    <tr>
-                        <td><a href="https://www.binance.com/en/futures/SPCXUSDT" target="_blank" rel="noopener">Binance Futures</a></td>
-                        <td>$201.25</td>
-                        <td>May 31, 2026</td>
-                        <td class="total-col" data-price="201.25">$0.00</td>
-                    </tr>
-                    <tr>
-                        <td><a href="https://www.nasdaqprivatemarket.com/company/spacex/" target="_blank" rel="noopener">Nasdaq Private Market</a></td>
-                        <td>$120.56</td>
-                        <td>May 14, 2026</td>
-                        <td class="total-col" data-price="120.56">$0.00</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
 
         <hr class="separator">
@@ -525,147 +582,199 @@
             </table>
         </div>
 
-        <div style="text-align: center; margin-top: 40px; font-size: 2rem;">
-            🚀🚀🚀
-        </div>
+        <div class="footer-emoji">🚀🚀🚀</div>
     </div>
 
     <script>
-        const SHAREWORKS_PRICE = 105.318;
-        function updateCountdown() {
-            const ipoDate = new Date('2026-06-12T00:00:00');
-            const now = new Date();
-            
-            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const startOfIPO = new Date(ipoDate.getFullYear(), ipoDate.getMonth(), ipoDate.getDate());
-            
-            const diffTime = startOfIPO - startOfToday;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            const countdownEl = document.getElementById('countdown');
-            
-            if (diffDays <= 0) {
-                countdownEl.textContent = 'T-0D';
-            } else {
-                countdownEl.textContent = `T-${diffDays}D`;
-            }
+        const CONFIG = {
+            TICK_MS: 1000,
+            CHART_LOAD_ATTEMPTS: 75,
+            CHART_LOAD_DELAY_MS: 200,
+            IPO_TARGET: new Date('2026-06-12T09:30:00-04:00'), // 9:30 AM ET (EDT) — 6:30 AM PT
+            DEFAULT_PRICE: 135,
+        };
+
+        const IPO_TIME_ZONES = [
+            { zone: 'UTC', label: 'UTC' },
+            { zone: 'America/New_York', label: 'EDT' },
+            { zone: 'America/Los_Angeles', label: 'PDT' },
+        ];
+
+        const els = {
+            countdown: document.getElementById('countdown'),
+            ipoDate: document.getElementById('ipoDate'),
+            pricePerShare: document.getElementById('pricePerShare'),
+            sharesInput: document.getElementById('sharesInput'),
+            costBasisInput: document.getElementById('costBasisInput'),
+            holdingsTotal: document.getElementById('holdingsTotal'),
+            bookmarkLink: document.getElementById('bookmarkLink'),
+            chartWidget: document.getElementById('chartWidget'),
+        };
+
+        function parseMoney(value) {
+            return parseFloat(String(value).replace(/[$,]/g, '')) || 0;
         }
 
         function formatCurrency(value) {
             return '$' + value.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 2,
             });
         }
 
-        function updateTotals() {
-            const shares = parseFloat(document.getElementById('sharesInput').value) || 0;
-            const costBasis = parseFloat(document.getElementById('costBasisInput').value) || 0;
-            const totalCells = document.querySelectorAll('[data-price]');
-            
-            totalCells.forEach(cell => {
-                const price = parseFloat(cell.dataset.price);
-                const total = shares * price;
-                cell.textContent = formatCurrency(total);
-            });
+        function formatCountdown(ms) {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
 
-            const taxCells = document.querySelectorAll('[data-taxrate]');
-            const gain = Math.max(0, shares * (SHAREWORKS_PRICE - costBasis));
-            
-            taxCells.forEach(cell => {
-                const taxRate = parseFloat(cell.dataset.taxrate);
-                const threshold = parseFloat(cell.dataset.threshold) || 0;
-                const surcharge = parseFloat(cell.dataset.surcharge) || 0;
-                
-                let tax = 0;
-                if (surcharge > 0 && threshold > 0) {
-                    // Tiered tax (e.g., MA): base rate on all, surcharge on excess over threshold
-                    tax = gain * taxRate;
-                    if (gain > threshold) {
-                        tax += (gain - threshold) * surcharge;
-                    }
-                } else if (threshold > 0) {
-                    // Threshold-only tax (e.g., WA): only tax amount over threshold
-                    const taxableAmount = Math.max(0, gain - threshold);
-                    tax = taxableAmount * taxRate;
-                } else {
-                    // Standard tax: rate on full amount
-                    tax = gain * taxRate;
-                }
-                
-                cell.textContent = formatCurrency(tax);
+        function formatIpoTime(timeZone) {
+            return CONFIG.IPO_TARGET.toLocaleString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZone,
+                hour12: true,
+            });
+        }
+
+        function flashElement(el) {
+            el.classList.remove('value-flash');
+            void el.offsetWidth;
+            el.classList.add('value-flash');
+        }
+
+        function updateTextWithFlash(el, text) {
+            if (!el || el.textContent === text) return;
+            if (el.dataset.initialized) flashElement(el);
+            el.textContent = text;
+            el.dataset.initialized = 'true';
+        }
+
+        function resolvePrice(raw) {
+            const numeric = raw ? parseMoney(raw) : 0;
+            return numeric > 0 ? numeric : CONFIG.DEFAULT_PRICE;
+        }
+
+        function getPricePerShare() {
+            return resolvePrice(els.pricePerShare?.value);
+        }
+
+        function getHoldingsState() {
+            const price = getPricePerShare();
+            const shares = parseMoney(els.sharesInput?.value);
+            const costBasis = parseMoney(els.costBasisInput?.value);
+            const gain = Math.max(0, shares * (price - costBasis));
+            return { price, shares, costBasis, gain };
+        }
+
+        function calculateStateTax(gain, cell) {
+            const rate = parseFloat(cell.dataset.taxrate);
+            const threshold = parseFloat(cell.dataset.threshold) || 0;
+            const surcharge = parseFloat(cell.dataset.surcharge) || 0;
+
+            if (surcharge > 0 && threshold > 0) {
+                let tax = gain * rate;
+                if (gain > threshold) tax += (gain - threshold) * surcharge;
+                return tax;
+            }
+            if (threshold > 0) {
+                return Math.max(0, gain - threshold) * rate;
+            }
+            return gain * rate;
+        }
+
+        function updateIpoDateLabel() {
+            if (!els.ipoDate) return;
+
+            const date = CONFIG.IPO_TARGET.toLocaleString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                timeZone: 'UTC',
+            });
+            const times = IPO_TIME_ZONES
+                .map(({ zone, label }) => `${formatIpoTime(zone)} ${label}`)
+                .join(' | ');
+            els.ipoDate.textContent = `IPO: ${date} — ${times}`;
+        }
+
+        function updateCountdown() {
+            if (!els.countdown) return;
+            els.countdown.textContent = formatCountdown(CONFIG.IPO_TARGET - Date.now());
+        }
+
+        function updateHoldings() {
+            const { price, shares, gain } = getHoldingsState();
+            updateTextWithFlash(els.holdingsTotal, formatCurrency(price * shares));
+
+            document.querySelectorAll('[data-taxrate]').forEach(cell => {
+                cell.textContent = formatCurrency(calculateStateTax(gain, cell));
             });
         }
 
         function updateURL() {
-            const shares = document.getElementById('sharesInput').value;
-            const costBasis = document.getElementById('costBasisInput').value;
+            if (!els.bookmarkLink) return;
+
             const params = new URLSearchParams();
+            const shares = els.sharesInput?.value;
+            const costBasis = els.costBasisInput?.value;
             if (shares) params.set('shares', shares);
             if (costBasis) params.set('basis', costBasis);
-            const origin = window.location.origin !== 'null' ? window.location.origin : '';
-            const baseURL = origin + window.location.pathname;
+
             const queryString = params.toString();
-            const cleanURL = queryString ? `${baseURL}?${queryString}` : baseURL;
+            const origin = window.location.origin !== 'null' ? window.location.origin : '';
+            const cleanURL = origin + window.location.pathname + (queryString ? `?${queryString}` : '');
+
             history.replaceState(null, '', queryString ? `?${queryString}` : window.location.pathname);
-            const bookmarkLink = document.getElementById('bookmarkLink');
-            bookmarkLink.href = cleanURL;
-            bookmarkLink.textContent = cleanURL;
+            els.bookmarkLink.href = cleanURL;
+            els.bookmarkLink.textContent = cleanURL;
         }
 
         function loadFromURL() {
             const params = new URLSearchParams(window.location.search);
             const shares = params.get('shares');
             const costBasis = params.get('basis') || params.get('costBasis');
-            if (shares) document.getElementById('sharesInput').value = shares;
-            if (costBasis) document.getElementById('costBasisInput').value = costBasis;
+            if (shares && els.sharesInput) els.sharesInput.value = shares;
+            if (costBasis && els.costBasisInput) els.costBasisInput.value = costBasis;
         }
 
         function onInputChange() {
-            updateTotals();
+            updateHoldings();
             updateURL();
         }
 
         function sortTable(table, colIndex, isAscending) {
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            
+
             rows.sort((a, b) => {
                 let aVal = a.cells[colIndex].textContent.trim();
                 let bVal = b.cells[colIndex].textContent.trim();
-                
-                // Handle currency values
+
                 if (aVal.startsWith('$')) {
-                    aVal = parseFloat(aVal.replace(/[$,]/g, '')) || 0;
-                    bVal = parseFloat(bVal.replace(/[$,]/g, '')) || 0;
-                    return isAscending ? aVal - bVal : bVal - aVal;
+                    return isAscending
+                        ? parseMoney(aVal) - parseMoney(bVal)
+                        : parseMoney(bVal) - parseMoney(aVal);
                 }
-                
-                // Handle emojis (✅ = 1, ❌ = 0)
+
                 if (aVal === '✅' || aVal === '❌') {
-                    aVal = aVal === '✅' ? 1 : 0;
-                    bVal = bVal === '✅' ? 1 : 0;
-                    return isAscending ? aVal - bVal : bVal - aVal;
+                    const aNum = aVal === '✅' ? 1 : 0;
+                    const bNum = bVal === '✅' ? 1 : 0;
+                    return isAscending ? aNum - bNum : bNum - aNum;
                 }
-                
-                // Handle dates
-                if (aVal.match(/^\d+\/\d+\/\d+$/)) {
-                    aVal = new Date(aVal);
-                    bVal = new Date(bVal);
-                    return isAscending ? aVal - bVal : bVal - aVal;
-                }
-                
-                // Default string comparison
+
                 return isAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
             });
-            
+
             rows.forEach(row => tbody.appendChild(row));
         }
 
         function initSortableTables() {
             document.querySelectorAll('.value-table').forEach(table => {
-                const headers = table.querySelectorAll('th');
-                headers.forEach((header, index) => {
+                table.querySelectorAll('th').forEach((header, index) => {
                     header.dataset.sortAsc = 'true';
                     header.addEventListener('click', () => {
                         const isAscending = header.dataset.sortAsc === 'true';
@@ -676,15 +785,89 @@
             });
         }
 
-        document.getElementById('sharesInput').addEventListener('input', onInputChange);
-        document.getElementById('costBasisInput').addEventListener('input', onInputChange);
+        function initFlashAnimations() {
+            ['pricePerShare', 'holdingsTotal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('animationend', () => el.classList.remove('value-flash'));
+                }
+            });
+        }
 
-        loadFromURL();
-        initSortableTables();
-        updateCountdown();
-        updateTotals();
-        updateURL();
-        setInterval(updateCountdown, 60000);
+        function collectShadowRoots(root, roots = []) {
+            if (!root) return roots;
+            roots.push(root);
+            root.querySelectorAll('*').forEach(el => {
+                if (el.shadowRoot) collectShadowRoots(el.shadowRoot, roots);
+            });
+            return roots;
+        }
+
+        function readPriceFromChart() {
+            if (!els.chartWidget?.shadowRoot) return null;
+
+            const pricePattern = /^\$?[\d,]+\.\d{2,4}$/;
+            const matches = [];
+
+            collectShadowRoots(els.chartWidget.shadowRoot).forEach(root => {
+                const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+                let node;
+                while ((node = walker.nextNode())) {
+                    const text = node.textContent.trim();
+                    if (pricePattern.test(text)) matches.push(text);
+                }
+            });
+
+            return matches[0] || null;
+        }
+
+        async function watchChartPrice() {
+            if (!els.chartWidget || !els.pricePerShare) return;
+
+            await customElements.whenDefined('tv-mini-chart');
+            let lastPrice = '';
+
+            const applyPrice = () => {
+                const price = resolvePrice(readPriceFromChart());
+                const formatted = formatCurrency(price);
+                if (formatted === lastPrice) return;
+
+                if (lastPrice) flashElement(els.pricePerShare);
+                lastPrice = formatted;
+                els.pricePerShare.value = formatted;
+                updateHoldings();
+            };
+
+            for (let i = 0; i < CONFIG.CHART_LOAD_ATTEMPTS; i++) {
+                applyPrice();
+                if (els.pricePerShare.value) break;
+                await new Promise(resolve => setTimeout(resolve, CONFIG.CHART_LOAD_DELAY_MS));
+            }
+
+            setInterval(applyPrice, CONFIG.TICK_MS);
+        }
+
+        function init() {
+            loadFromURL();
+            initSortableTables();
+            initFlashAnimations();
+
+            els.sharesInput?.addEventListener('input', onInputChange);
+            els.costBasisInput?.addEventListener('input', onInputChange);
+
+            updateIpoDateLabel();
+            updateCountdown();
+            if (els.pricePerShare && parseMoney(els.pricePerShare.value) === 0) {
+                els.pricePerShare.value = formatCurrency(CONFIG.DEFAULT_PRICE);
+            }
+            updateHoldings();
+            updateURL();
+
+            setInterval(updateCountdown, CONFIG.TICK_MS);
+            watchChartPrice();
+        }
+
+        init();
     </script>
 </body>
 </html>
