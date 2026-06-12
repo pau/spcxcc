@@ -45,20 +45,6 @@
             margin-bottom: 5px;
         }
 
-        .countdown-section {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .countdown {
-            font-size: 5rem;
-            font-weight: normal;
-        }
-
-        .ipo-date {
-            margin-top: 10px;
-        }
-
         .panel {
             margin-bottom: 40px;
         }
@@ -226,13 +212,6 @@
         <header>
             <h1>🍀 SPCX COMMAND CENTER 🍀</h1>
         </header>
-
-        <section class="countdown-section">
-            <div class="countdown" id="countdown">--:--:--</div>
-            <div class="ipo-date" id="ipoDate"></div>
-        </section>
-
-        <hr class="separator">
 
         <div class="panel chart-holdings-panel">
             <div class="chart-col">
@@ -590,19 +569,10 @@
             TICK_MS: 1000,
             CHART_LOAD_ATTEMPTS: 75,
             CHART_LOAD_DELAY_MS: 200,
-            IPO_TARGET: new Date('2026-06-12T09:30:00-04:00'), // 9:30 AM ET (EDT) — 6:30 AM PT
             DEFAULT_PRICE: 135,
         };
 
-        const IPO_TIME_ZONES = [
-            { zone: 'UTC', label: 'UTC' },
-            { zone: 'America/New_York', label: 'EDT' },
-            { zone: 'America/Los_Angeles', label: 'PDT' },
-        ];
-
         const els = {
-            countdown: document.getElementById('countdown'),
-            ipoDate: document.getElementById('ipoDate'),
             pricePerShare: document.getElementById('pricePerShare'),
             sharesInput: document.getElementById('sharesInput'),
             costBasisInput: document.getElementById('costBasisInput'),
@@ -619,24 +589,6 @@
             return '$' + value.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-            });
-        }
-
-        function formatCountdown(ms) {
-            const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-        }
-
-        function formatIpoTime(timeZone) {
-            return CONFIG.IPO_TARGET.toLocaleString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                timeZone,
-                hour12: true,
             });
         }
 
@@ -684,26 +636,6 @@
                 return Math.max(0, gain - threshold) * rate;
             }
             return gain * rate;
-        }
-
-        function updateIpoDateLabel() {
-            if (!els.ipoDate) return;
-
-            const date = CONFIG.IPO_TARGET.toLocaleString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-                timeZone: 'UTC',
-            });
-            const times = IPO_TIME_ZONES
-                .map(({ zone, label }) => `${formatIpoTime(zone)} ${label}`)
-                .join(' | ');
-            els.ipoDate.textContent = `IPO: ${date} — ${times}`;
-        }
-
-        function updateCountdown() {
-            if (!els.countdown) return;
-            els.countdown.textContent = formatCountdown(CONFIG.IPO_TARGET - Date.now());
         }
 
         function updateHoldings() {
@@ -855,15 +787,12 @@
             els.sharesInput?.addEventListener('input', onInputChange);
             els.costBasisInput?.addEventListener('input', onInputChange);
 
-            updateIpoDateLabel();
-            updateCountdown();
             if (els.pricePerShare && parseMoney(els.pricePerShare.value) === 0) {
                 els.pricePerShare.value = formatCurrency(CONFIG.DEFAULT_PRICE);
             }
             updateHoldings();
             updateURL();
 
-            setInterval(updateCountdown, CONFIG.TICK_MS);
             watchChartPrice();
         }
 
